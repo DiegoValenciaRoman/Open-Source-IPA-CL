@@ -56,8 +56,8 @@ class DialogCore {
         console.log(data);
         process.stdout.write(
           data.results[0] && data.results[0].alternatives[0]
-            ? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
-            : "\n\nReached transcription time limit, press Ctrl+C\n"
+            ? `Transcripcion: ${data.results[0].alternatives[0].transcript}\n`
+            : "\n\nLimite de transcripciones, presione Ctrl+c\n"
         );
         this.current_request = data.results[0].alternatives[0].transcript;
         this.controladorDialogo(0, 0, "procesado");
@@ -82,6 +82,8 @@ function ClientServiceExecutor(entities) {
   console.log("clientserviceexecutor ", entities);
   let intencion = entities.intents[0].name;
   switch (intencion) {
+    //cambiar segun sistema operativo (actual macOS)
+    //TODO: estandarizar
     case "open_software_app":
       let app = entities.entities["programa:programa"];
       console.log("app a abrir:", app[0].value, "largo:", app[0].value.length);
@@ -104,6 +106,7 @@ function ClientServiceExecutor(entities) {
       }
 
       break;
+    //estandarizado
     case "buscar":
       let buscar = entities.entities["wit$search_query:search_query"];
       console.log("buscar ", buscar[0].value);
@@ -125,6 +128,7 @@ function ClientServiceExecutor(entities) {
         console.error(err);
       }
       break;
+    //estandarizado con youtube
     case "play_music":
       let artista = entities.entities["artista:artista"];
       let cancion = entities.entities["cancion:cancion"];
@@ -160,7 +164,6 @@ function ClientServiceExecutor(entities) {
 }
 
 async function ClientService(encoding, sampleRateHertz, languageCode) {
-  // [START micStreamRecognize]
   console.log(encoding, sampleRateHertz, languageCode);
   const config = {
     encoding: encoding,
@@ -170,14 +173,13 @@ async function ClientService(encoding, sampleRateHertz, languageCode) {
 
   const request = {
     config,
-    interimResults: false, //Get interim results from stream
+    interimResults: false,
   };
 
-  // Creates a client
+  // Crear cliente
   const client = new speech.SpeechClient();
 
   let dialogcore = new DialogCore(config, request, client);
-  // Create a recognize stream
   /*const recognizeStream = client
     .streamingRecognize(request)
     .on("error", console.error)
@@ -191,7 +193,7 @@ async function ClientService(encoding, sampleRateHertz, languageCode) {
       getIntent(data.results[0].alternatives[0].transcript);
     });*/
 
-  // Start recording and send the microphone input to the Speech API
+  // empieza a grabar el input del microfono y enviarlo al controlador de dialogo
   await recorder
     .record({
       sampleRateHertz: sampleRateHertz,
@@ -209,48 +211,7 @@ async function ClientService(encoding, sampleRateHertz, languageCode) {
       )
     );
 
-  console.log("Listening, press Ctrl+C to stop.");
-  // [END micStreamRecognize]
+  console.log("Escuchando, persiona Ctrl+C para terminar.");
 }
 
 ClientService("LINEAR16", 16000, "es-CL");
-
-/*
-require("yargs")
-  .demand(1)
-  .command(
-    "micStreamRecognize",
-    "Streams audio input from microphone, translates to text",
-    {},
-    (opts) =>
-      microphoneStream(opts.encoding, opts.sampleRateHertz, opts.languageCode)
-  )
-  .options({
-    encoding: {
-      alias: "e",
-      default: "LINEAR16",
-      global: true,
-      requiresArg: true,
-      type: "string",
-    },
-    sampleRateHertz: {
-      alias: "r",
-      default: 16000,
-      global: true,
-      requiresArg: true,
-      type: "number",
-    },
-    languageCode: {
-      alias: "l",
-      default: "es-CL",
-      global: true,
-      requiresArg: true,
-      type: "string",
-    },
-  })
-  .example("node $0 micStreamRecognize")
-  .wrap(120)
-  .recommendCommands()
-  .epilogue("For more information, see https://cloud.google.com/speech/docs")
-  .help()
-  .strict().argv;*/
