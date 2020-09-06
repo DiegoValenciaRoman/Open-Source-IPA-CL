@@ -12,7 +12,7 @@ OsIPACL es un asistente inteligente open source
 
 ## Instalación
 
-Usando npm
+Usando npm en UNIX
 
 ```bash
 npm install
@@ -20,7 +20,7 @@ npm install
 
 ## Uso
 
-Usando npm
+UNIX
 
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS="trus_credenciales_google.json"
